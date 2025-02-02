@@ -1,0 +1,93 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  auth0Id       String    @unique
+  email         String    @unique
+  name          String?
+  picture       String?
+  organizations OrganizationMember[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sentInvitations Invitation[] @relation("invitedBy")
+}
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  members   OrganizationMember[]
+  services  Service[]
+  incidents Incident[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  invitations    Invitation[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  role           String       // e.g., 'admin', 'member'
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, organizationId])
+}
+
+model Service {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  status         String       // e.g., 'operational', 'degraded', 'outage'
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  incidents      Incident[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Incident {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  status         String       // e.g., 'investigating', 'identified', 'monitoring', 'resolved'
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  services       Service[]
+  updates        IncidentUpdate[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model IncidentUpdate {
+  id          String    @id @default(cuid())
+  message     String
+  status      String
+  incident    Incident  @relation(fields: [incidentId], references: [id])
+  incidentId  String
+  createdAt   DateTime  @default(now())
+}
+
+model Invitation {
+  id             String       @id @default(cuid())
+  email          String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  invitedBy      User         @relation(fields: [invitedById], references: [id])
+  invitedById    String
+  status         String       // e.g., 'pending', 'accepted', 'rejected'
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([email, organizationId])
+}
+

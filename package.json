@@ -1,0 +1,46 @@
+{
+  "name": "status-page-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"next dev\" \"nodemon server/index.js\"",
+    "build": "next build",
+    "start": "NODE_ENV=production node server/index.js",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth0/nextjs-auth0": "^3.0.0",
+    "@prisma/client": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-jwt": "^8.4.1",
+    "express-jwt-authz": "^2.4.1",
+    "jwks-rsa": "^3.0.1",
+    "next": "13.4.10",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.1",
+    "class-variance-authority": "^0.6.1",
+    "clsx": "^1.2.1",
+    "lucide-react": "^0.260.0",
+    "tailwind-merge": "^1.13.2",
+    "tailwindcss-animate": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "20.4.2",
+    "@types/react": "18.2.15",
+    "@types/react-dom": "18.2.7",
+    "autoprefixer": "10.4.14",
+    "concurrently": "^8.2.0",
+    "eslint": "8.45.0",
+    "eslint-config-next": "13.4.10",
+    "nodemon": "^3.0.1",
+    "postcss": "8.4.26",
+    "prisma": "^5.0.0",
+    "tailwindcss": "3.3.3",
+    "typescript": "5.1.6"
+  }
+}
+
