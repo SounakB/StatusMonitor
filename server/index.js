@@ -79,8 +79,9 @@ app.post("/api/organizations", checkJwt, async (req, res) => {
 
 app.get("/api/organizations", checkJwt, async (req, res) => {
   try {
-    const auth0Id = req.auth.sub
-    const user = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
+    const auth0Id = 1; //req.auth.sub ?? 1;
+    //const user = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
+    const user = await getOrCreateUser('1', 'abc@gm.c', 'S B')
 
     const organizations = await prisma.organizationMember.findMany({
       where: { userId: user.id },
@@ -89,7 +90,8 @@ app.get("/api/organizations", checkJwt, async (req, res) => {
 
     res.json(organizations.map((om) => om.organization))
   } catch (error) {
-    res.status(500).json({ error: "Error fetching organizations" })
+    console.error("Error fetching organizations:", error)
+    res.status(500).json({ error: "Error fetching organizations", errorObject: error.message })
   }
 })
 
