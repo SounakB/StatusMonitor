@@ -1,3 +1,5 @@
+require('dotenv').config({ path: "../.env.local" });
+
 const express = require("express")
 const http = require("http")
 const { Server } = require("socket.io")
@@ -23,23 +25,30 @@ app.use(express.json())
 const PORT = process.env.PORT || 5000
 
 // Auth0 middleware
-const checkJwt = (req, res, next) => {
+
+const _checkJwt = (req, res, next) => {
   console.log('Request URL:', req.originalUrl)
+  console.log('process.env', process.env);
+
+  console.log('process.env.AUTH0_DOMAIN', process.env.AUTH0_DOMAIN)
+
+  console.log('process.env.AUTH0_AUDIENCE', process.env.AUTH0_AUDIENCE)
   next()
 }
-/*
+
+
 const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+    jwksUri: `${process.env.AUTH0_ISSUER_BASE_URL}/.well-known/jwks.json`,
   }),
   audience: process.env.AUTH0_AUDIENCE,
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+  issuer: `${process.env.AUTH0_ISSUER_BASE_URL}/`,
   algorithms: ["RS256"],
 })
-  */
+
 
 // Helper function to get or create user
 async function getOrCreateUser(auth0Id, email, name) {
@@ -57,6 +66,7 @@ app.post("/api/organizations", checkJwt, async (req, res) => {
   try {
     const { name } = req.body
     const auth0Id = req.auth.sub
+    const email = req.auth.email
     const user = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
 
     const organization = await prisma.organization.create({
@@ -79,9 +89,9 @@ app.post("/api/organizations", checkJwt, async (req, res) => {
 
 app.get("/api/organizations", checkJwt, async (req, res) => {
   try {
-    const auth0Id = 1; //req.auth.sub ?? 1;
-    //const user = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
-    const user = await getOrCreateUser('1', 'abc@gm.c', 'S B')
+    const auth0Id = req.auth.sub ?? 1;
+    const user = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
+    //const user = await getOrCreateUser('1', 'abc@gm.c', 'S B')
 
     const organizations = await prisma.organizationMember.findMany({
       where: { userId: user.id },

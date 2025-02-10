@@ -24,24 +24,53 @@ export function leaveOrganization(orgId: string) {
   }
 }
 
-async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  //sconst session = await getSession()
-  const token = ''; //session?.accessToken
+export async function serverFetchAPI(endpoint: string, options: RequestInit = {}) {
+  if (typeof window !== 'undefined') {
+    throw new Error('fetchAPI should only be called from server-side code')
+  }
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      ...options.headers,
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  })
+  console.log('body', options.body);
+
+  const res = await fetch(`${API_URL}${endpoint}`, options)
 
   if (!res.ok) {
     throw new Error("API request failed")
   }
 
   return res.json()
+}
+
+export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
+  
+  if (typeof window === 'undefined') {
+    const session = await getSession()
+    const token = session?.accessToken;
+    options = {
+      ...options,
+      headers: {
+        ...options.headers,
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    }    
+    
+    return serverFetchAPI(endpoint, options);
+  }
+  else {
+    const res = await fetch(`${endpoint}`, {
+      ...options,
+      headers: {
+        ...options.headers,
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!res.ok) {
+      throw new Error("API request failed")
+    }
+
+    return res.json()
+  }
 }
 
 export async function createOrganization(name: string) {
