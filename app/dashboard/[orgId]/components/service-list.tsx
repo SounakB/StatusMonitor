@@ -1,5 +1,8 @@
+import { useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { EditServiceForm } from "./edit-service-form"
 
 type Service = {
   id: string
@@ -10,9 +13,19 @@ type Service = {
 
 type ServiceListProps = {
   services: Service[]
+  orgId: string
 }
 
-export function ServiceList({ services }: ServiceListProps) {
+export function ServiceList({ services, orgId }: ServiceListProps) {
+  const [editingService, setEditingService] = useState<Service | null>(null)
+
+  const handleUpdate = (updatedService: Service) => {
+    // Update the service in the list
+    const updatedServices = services.map((service) => (service.id === updatedService.id ? updatedService : service))
+    // You might want to update the parent component's state here
+    setEditingService(null)
+  }
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Services</h2>
@@ -22,6 +35,7 @@ export function ServiceList({ services }: ServiceListProps) {
             <TableHead>Name</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -32,10 +46,25 @@ export function ServiceList({ services }: ServiceListProps) {
               <TableCell>
                 <Badge variant={service.status === "operational" ? "success" : "destructive"}>{service.status}</Badge>
               </TableCell>
+              <TableCell>
+                <Button onClick={() => setEditingService(service)}>Edit</Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      {editingService && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <EditServiceForm
+              service={editingService}
+              orgId={orgId}
+              onUpdate={handleUpdate}
+              onCancel={() => setEditingService(null)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
