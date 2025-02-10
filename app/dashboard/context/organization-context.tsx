@@ -3,6 +3,7 @@
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import { getOrganizations } from "@/lib/api-client"
 
 type OrganizationContextType = {
   currentOrganization: string | null
@@ -18,9 +19,17 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     const orgIdFromPath = pathname.split("/")[2]
     if (orgIdFromPath) {
-      setCurrentOrganization(orgIdFromPath)
+      
+      fetchOrganizations().then((orgs) => {
+        setCurrentOrganization(orgs.find((org) => org.id === orgIdFromPath)?.id || null)
+      })
     }
   }, [pathname])
+
+  const fetchOrganizations = async () => {
+    const orgs = await getOrganizations()
+    return orgs;
+  }
 
   return (
     <OrganizationContext.Provider value={{ currentOrganization, setCurrentOrganization }}>
