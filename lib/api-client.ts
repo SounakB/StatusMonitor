@@ -106,6 +106,22 @@ export async function createIncident(orgId: string, incidentData: any) {
   })
 }
 
+
+export async function updateService(orgId: string, serviceId: string, serviceData: any) {
+  return fetchAPI(`/api/organizations/${orgId}/services/${serviceId}`, {
+    method: "PUT",
+    body: JSON.stringify(serviceData),
+  })
+}
+
+export async function updateIncident(orgId: string, incidentId: string, incidentData: any) {
+  return fetchAPI(`/api/organizations/${orgId}/incidents/${incidentId}`, {
+    method: "PUT",
+    body: JSON.stringify(incidentData),
+  })
+}
+
+
 export async function getPublicStatus(orgId: string) {
   return fetchAPI(`/api/status/${orgId}`)
 }

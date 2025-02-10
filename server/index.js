@@ -141,6 +141,26 @@ app.get("/api/organizations/:orgId/services", checkJwt, async (req, res) => {
   }
 })
 
+// Update service route
+app.put("/api/organizations/:orgId/services/:serviceId", checkJwt, async (req, res) => {
+  try {
+    const { orgId, serviceId } = req.params
+    const { name, description, status } = req.body
+
+    const updatedService = await prisma.service.update({
+      where: { id: serviceId, organizationId: orgId },
+      data: { name, description, status },
+    })
+
+    // Emit WebSocket event for service update
+    io.to(orgId).emit("serviceUpdated", updatedService)
+
+    res.json(updatedService)
+  } catch (error) {
+    res.status(500).json({ error: "Error updating service" })
+  }
+})
+
 // Incident routes
 app.post("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
   try {
@@ -181,6 +201,35 @@ app.get("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
     res.json(incidents)
   } catch (error) {
     res.status(500).json({ error: "Error fetching incidents" })
+  }
+})
+
+app.put("/api/organizations/:orgId/incidents/:incidentId", checkJwt, async (req, res) => {
+  try {
+    const { orgId, incidentId } = req.params
+    const { title, description, status, affectedServices } = req.body
+
+    const updatedIncident = await prisma.incident.update({
+      where: { id: incidentId, organizationId: orgId },
+      data: {
+        title,
+        description,
+        status,
+        services: {
+          set: affectedServices.map((id) => ({ id })),
+        },
+      },
+      include: {
+        services: true,
+      },
+    })
+
+    // Emit WebSocket event for incident update
+    io.to(orgId).emit("incidentUpdated", updatedIncident)
+
+    res.json(updatedIncident)
+  } catch (error) {
+    res.status(500).json({ error: "Error updating incident" })
   }
 })
 
