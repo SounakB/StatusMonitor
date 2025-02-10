@@ -10,36 +10,61 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useOrganization } from "@/app/dashboard/context/organization-context"
 
+type Service = {
+  id: string
+  name: string
+  status: string
+}
 
 type CreateIncidentFormProps = {
+  orgId: string
   onIncidentCreated: (incident: any) => void
 }
 
-export function CreateIncidentForm({ onIncidentCreated }: CreateIncidentFormProps) {
+export function CreateIncidentForm({ orgId, onIncidentCreated }: CreateIncidentFormProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState("investigating")
-  const [affectedServices, setAffectedServices] = useState([])
-  const [services, setServices] = useState([])
-  const { currentOrganization } = useOrganization()
+  const [services, setServices] = useState<Service[]>([])
+  const [affectedServices, setAffectedServices] = useState<{ [key: string]: { affected: boolean; status: string } }>({})
 
   useEffect(() => {
     const fetchServices = async () => {
-      if (currentOrganization) {
-        const fetchedServices = await getServices(currentOrganization)
-        setServices(fetchedServices)
-      }
+      const fetchedServices = await getServices(orgId)
+      setServices(fetchedServices)
+      const initialAffectedServices = fetchedServices.reduce((acc, service) => {
+        acc[service.id] = { affected: false, status: service.status }
+        return acc
+      }, {})
+      setAffectedServices(initialAffectedServices)
     }
     fetchServices()
-  }, [currentOrganization])
+  }, [orgId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      if (currentOrganization) {
-        const newIncident = await createIncident(currentOrganization, { title, description, status, affectedServices })
-        onIncidentCreated(newIncident)
-      }
+      const affectedServiceData = Object.entries(affectedServices)
+        .filter(([_, data]) => data.affected)
+        .map(([id, data]) => ({ id, status: data.status }))
+
+      const newIncident = await createIncident(orgId, {
+        title,
+        description,
+        status,
+        affectedServices: affectedServiceData,
+      })
+      onIncidentCreated(newIncident)
+      // Reset form
+      setTitle("")
+      setDescription("")
+      setStatus("investigating")
+      setAffectedServices(
+        services.reduce((acc, service) => {
+          acc[service.id] = { affected: false, status: service.status }
+          return acc
+        }, {}),
+      )
     } catch (error) {
       console.error("Error creating incident:", error)
     }
@@ -72,17 +97,37 @@ export function CreateIncidentForm({ onIncidentCreated }: CreateIncidentFormProp
       <div>
         <Label>Affected Services</Label>
         {services.map((service) => (
-          <div key={service.id} className="flex items-center space-x-2">
+          <div key={service.id} className="flex items-center space-x-2 mt-2">
             <Checkbox
               id={`service-${service.id}`}
-              checked={affectedServices.includes(service.id)}
+              checked={affectedServices[service.id]?.affected}
               onCheckedChange={(checked) => {
-                setAffectedServices(
-                  checked ? [...affectedServices, service.id] : affectedServices.filter((id) => id !== service.id),
-                )
+                setAffectedServices((prev) => ({
+                  ...prev,
+                  [service.id]: { ...prev[service.id], affected: checked as boolean },
+                }))
               }}
             />
             <Label htmlFor={`service-${service.id}`}>{service.name}</Label>
+            <Select
+              value={affectedServices[service.id]?.status}
+              onValueChange={(value) => {
+                setAffectedServices((prev) => ({
+                  ...prev,
+                  [service.id]: { ...prev[service.id], status: value },
+                }))
+              }}
+              disabled={!affectedServices[service.id]?.affected}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="operational">Operational</SelectItem>
+                <SelectItem value="degraded">Degraded</SelectItem>
+                <SelectItem value="outage">Outage</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         ))}
       </div>
