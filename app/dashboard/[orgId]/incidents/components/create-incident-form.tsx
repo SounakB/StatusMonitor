@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useOrganization } from "@/app/dashboard/context/organization-context"
+
 
 type CreateIncidentFormProps = {
   onIncidentCreated: (incident: any) => void
@@ -19,6 +21,7 @@ export function CreateIncidentForm({ onIncidentCreated }: CreateIncidentFormProp
   const [status, setStatus] = useState("investigating")
   const [affectedServices, setAffectedServices] = useState([])
   const [services, setServices] = useState([])
+  const { currentOrganization } = useOrganization()
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -29,14 +32,13 @@ export function CreateIncidentForm({ onIncidentCreated }: CreateIncidentFormProp
       }
     }
     fetchServices()
-  }, [])
+  }, [currentOrganization])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const token = localStorage.getItem("token")
-      if (token) {
-        const newIncident = await createIncident(token, { title, description, status, affectedServices })
+      if (currentOrganization) {
+        const newIncident = await createIncident(currentOrganization, { title, description, status, affectedServices })
         onIncidentCreated(newIncident)
       }
     } catch (error) {

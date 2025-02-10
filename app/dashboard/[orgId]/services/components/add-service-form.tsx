@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useOrganization } from "@/app/dashboard/context/organization-context"
 
 type AddServiceFormProps = {
   onServiceAdded: (service: any) => void
@@ -16,15 +17,18 @@ export function AddServiceForm({ onServiceAdded }: AddServiceFormProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState("operational")
+  const { currentOrganization } = useOrganization()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const token = localStorage.getItem("token")
-      if (token) {
-        const newService = await createService(token, { name, description, status })
+      //const token = localStorage.getItem("token")
+      //if (token) {
+      if (currentOrganization) {
+        const newService = await createService(currentOrganization,{ name, description, status })
         onServiceAdded(newService)
       }
+      //}
     } catch (error) {
       console.error("Error adding service:", error)
     }
