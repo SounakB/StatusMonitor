@@ -25,9 +25,8 @@ export function CreateIncidentForm({ onIncidentCreated }: CreateIncidentFormProp
 
   useEffect(() => {
     const fetchServices = async () => {
-      const token = localStorage.getItem("token")
-      if (token) {
-        const fetchedServices = await getServices(token)
+      if (currentOrganization) {
+        const fetchedServices = await getServices(currentOrganization)
         setServices(fetchedServices)
       }
     }
