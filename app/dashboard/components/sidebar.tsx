@@ -4,14 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Home, BarChart, Bell, Settings, LogOut, PlusCircle } from "lucide-react"
-
-const navItems = [
-  { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/dashboard/services", label: "Services", icon: BarChart },
-  { href: "/dashboard/incidents", label: "Incidents", icon: Bell },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-  { href: "/dashboard/create-organization", label: "Create Organization", icon: PlusCircle },
-]
+import { useOrganization } from "@/app/dashboard/context/organization-context"
+import { useEffect, useState } from "react"
 
 type SidebarProps = {
   user: {
@@ -20,8 +14,27 @@ type SidebarProps = {
   }
 }
 
+const defaultNavItems = [
+  { href: "/dashboard", label: "Home", icon: Home },
+  { href: "/dashboard/create-organization", label: "Create Organization", icon: PlusCircle },
+]
+
+
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
+  const { currentOrganization } = useOrganization()
+
+  const [navItems, setNavItems] = useState(defaultNavItems)
+
+  useEffect(() => {
+    if (currentOrganization) {
+      setNavItems([...defaultNavItems, 
+        { href: `/dashboard/${currentOrganization}/services`, label: "Services", icon: BarChart }, 
+        { href: `/dashboard/${currentOrganization}/incidents`, label: "Incidents", icon: Bell }, 
+        { href: `/dashboard/${currentOrganization}/settings`, label: "Settings", icon: Settings }
+      ])
+    }
+  }, [currentOrganization])
 
   return (
     <div className="w-64 bg-gray-100 p-4 flex flex-col h-full">
