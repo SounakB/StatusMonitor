@@ -174,13 +174,20 @@ app.post("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
         status,
         organizationId: orgId,
         services: {
-          connect: affectedServices.map((id) => ({ id })),
+          connect: affectedServices.map((service) => ({ id: service.id })),
         },
       },
       include: {
         services: true,
       },
     })
+
+    for (const service of affectedServices) {
+      await prisma.service.update({
+        where: { id: service.id, organizationId: orgId },
+        data: { status: service.status },
+      })
+    }
 
     // Emit WebSocket event for incident creation
     io.to(orgId).emit("incidentCreated", incident)
@@ -216,13 +223,20 @@ app.put("/api/organizations/:orgId/incidents/:incidentId", checkJwt, async (req,
         description,
         status,
         services: {
-          set: affectedServices.map((id) => ({ id })),
+          set: affectedServices.map((service) => ({ id: service.id })),
         },
       },
       include: {
         services: true,
       },
     })
+
+    for (const service of affectedServices) {
+      await prisma.service.update({
+        where: { id: service.id, organizationId: orgId },
+        data: { status: service.status },
+      })
+    }
 
     // Emit WebSocket event for incident update
     io.to(orgId).emit("incidentUpdated", updatedIncident)
