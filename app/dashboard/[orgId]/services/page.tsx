@@ -5,18 +5,18 @@ import { getServices } from "@/lib/api-client"
 import { ServiceList } from "./components/service-list"
 import { Button } from "@/components/ui/button"
 import { AddServiceForm } from "./components/add-service-form"
+import { useParams } from "next/navigation"
 
 export default function ServicesPage() {
   const [services, setServices] = useState([])
   const [isAddingService, setIsAddingService] = useState(false)
+  const params = useParams()
+  const orgId = params?.orgId as string
 
   useEffect(() => {
     const fetchServices = async () => {
-      const token = localStorage.getItem("token")
-      if (token) {
-        const fetchedServices = await getServices(token)
-        setServices(fetchedServices)
-      }
+      const fetchedServices = await getServices(orgId)
+      setServices(fetchedServices)
     }
     fetchServices()
   }, [])
@@ -31,13 +31,14 @@ export default function ServicesPage() {
       </div>
       {isAddingService && (
         <AddServiceForm
+          orgId={orgId}
           onServiceAdded={(newService) => {
             setServices([...services, newService])
             setIsAddingService(false)
           }}
         />
       )}
-      <ServiceList services={services} />
+      <ServiceList services={services} orgId={orgId} />
     </div>
   )
 }

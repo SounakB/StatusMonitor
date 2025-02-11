@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getServices, updateIncident } from "@/lib/api-client"
-import { useOrganization } from "../../context/organization-context"
 
 type Incident = {
   id: string
@@ -30,17 +29,14 @@ export function EditIncidentForm({ incident, orgId, allServices, onUpdate, onCan
   const [status, setStatus] = useState(incident.status)
   const [affectedServices, setAffectedServices] = useState(incident.services.map((s) => s.id))
   const [services, setServices] = useState([])
-  const { currentOrganization } = useOrganization()
 
   useEffect(() => {
     const fetchServices = async () => {
-      if (currentOrganization) {
-        const fetchedServices = await getServices(currentOrganization)
+        const fetchedServices = await getServices(orgId)
         setServices(fetchedServices)
-      }
     }
     fetchServices()
-  }, [currentOrganization])
+  }, [orgId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

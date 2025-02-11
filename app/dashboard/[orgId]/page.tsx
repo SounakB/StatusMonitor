@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { getServices, getIncidents, initializeSocket, joinOrganization, leaveOrganization } from "@/lib/api-client"
-import { ServiceList } from "./components/service-list"
-import { IncidentList } from "./components/incident-list"
+import { ServiceList } from "./services/components/service-list"
+import { IncidentList } from "./incidents/components/incident-list"
 
 export default function DashboardPage() {
   const [services, setServices] = useState([])
@@ -42,8 +42,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Dashboard</h1>
-      <ServiceList services={services} />
-      <IncidentList incidents={incidents} />
+      <ServiceList orgId={orgId} services={services} />
+      <IncidentList incidents={incidents} orgId={orgId} />
     </div>
   )
 }

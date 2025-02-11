@@ -10,25 +10,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { useOrganization } from "@/app/dashboard/context/organization-context"
 
 type AddServiceFormProps = {
-  onServiceAdded: (service: any) => void
+  onServiceAdded: (service: any) => void,
+  orgId: string
 }
 
-export function AddServiceForm({ onServiceAdded }: AddServiceFormProps) {
+export function AddServiceForm({ onServiceAdded, orgId }: AddServiceFormProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState("operational")
-  const { currentOrganization } = useOrganization()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      //const token = localStorage.getItem("token")
-      //if (token) {
-      if (currentOrganization) {
-        const newService = await createService(currentOrganization,{ name, description, status })
+        const newService = await createService(orgId,{ name, description, status })
         onServiceAdded(newService)
-      }
-      //}
     } catch (error) {
       console.error("Error adding service:", error)
     }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { getIncidents, initializeSocket, joinOrganization, leaveOrganization } from "@/lib/api-client"
-import { IncidentList } from "../components/incident-list"
+import { IncidentList } from "./components/incident-list"
 import { Button } from "@/components/ui/button"
 import { CreateIncidentForm } from "./components/create-incident-form"
 
@@ -11,7 +11,7 @@ export default function IncidentsPage() {
   const [incidents, setIncidents] = useState([])
   const [isCreatingIncident, setIsCreatingIncident] = useState(false)
   const params = useParams()
-  const orgId = params.orgId as string
+  const orgId = params?.orgId as string
 
   useEffect(() => {
     const fetchIncidents = async () => {
@@ -51,7 +51,7 @@ export default function IncidentsPage() {
           }}
         />
       )}
-      <IncidentList incidents={incidents} />
+      <IncidentList incidents={incidents} orgId={orgId} />
     </div>
   )
 }
