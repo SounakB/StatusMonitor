@@ -4,13 +4,29 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { EditIncidentForm } from "./edit-incident-form"
 
+type Service = {
+  id: string
+  name: string
+  status: string
+}
+
+type IncidentMessage = {
+  id: string
+  content: string
+  status: string
+  createdAt: string
+}
+
 type Incident = {
   id: string
   title: string
-  description: string
   status: string
   createdAt: string
-  services: { id: string; name: string }[]
+  services: {
+    service: Service
+    status: string
+  }[]
+  messages: IncidentMessage[]
 }
 
 type IncidentListProps = {
@@ -39,8 +55,8 @@ export function IncidentList({ incidents, orgId }: IncidentListProps) {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead>Last Updated At</TableHead>
+            <TableHead>Affected Services</TableHead>
+            <TableHead>Latest Update</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -51,11 +67,26 @@ export function IncidentList({ incidents, orgId }: IncidentListProps) {
               <TableCell>
                 <Badge variant={incident.status === "resolved" ? "success" : "destructive"}>{incident.status}</Badge>
               </TableCell>
-              <TableCell>{new Date(incident.createdAt).toLocaleString()}</TableCell>
-              <TableCell>{new Date(incident.updatedAt).toLocaleString()}</TableCell>
-
               <TableCell>
-                <Button onClick={() => setEditingIncident(incident)}>Edit</Button>
+                {incident.services.map((service) => (
+                  <div key={service.service.id} className="flex items-center space-x-2 mb-1">
+                    <span>{service.service.name}:</span>
+                    <Badge variant={service.status === "operational" ? "success" : "destructive"}>
+                      {service.status}
+                    </Badge>
+                  </div>
+                ))}
+              </TableCell>
+              <TableCell>
+                {incident.messages.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-500">{new Date(incident.messages[0].createdAt).toLocaleString()}</p>
+                    <p className="truncate">{incident.messages[0].content}</p>
+                  </div>
+                )}
+              </TableCell>
+              <TableCell>
+                <Button onClick={() => onIncidentSelect(incident)}>View Timeline</Button>
               </TableCell>
             </TableRow>
           ))}

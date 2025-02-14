@@ -176,9 +176,16 @@ app.post("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
         services: {
           connect: affectedServices.map((service) => ({ id: service.id })),
         },
+        messages: {
+          create: {
+            content: message,
+            status: status,
+          },
+        },
       },
       include: {
         services: true,
+        messages: true,
       },
     })
 
@@ -225,9 +232,20 @@ app.put("/api/organizations/:orgId/incidents/:incidentId", checkJwt, async (req,
         services: {
           set: affectedServices.map((service) => ({ id: service.id })),
         },
+        messages: {
+          create: {
+            content: message,
+            status: status,
+          },
+        },
       },
       include: {
         services: true,
+        messages: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },      
       },
     })
 

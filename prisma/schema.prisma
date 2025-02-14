@@ -64,8 +64,18 @@ model Incident {
   organizationId String
   services       Service[]
   updates        IncidentUpdate[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  messages       IncidentMessage[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model IncidentMessage {
+  id          String    @id @default(cuid())
+  content     String
+  status      String
+  incident    Incident  @relation(fields: [incidentId], references: [id])
+  incidentId  String
+  createdAt   DateTime  @default(now())
 }
 
 model IncidentUpdate {

@@ -26,6 +26,8 @@ export function CreateIncidentForm({ orgId, onIncidentCreated }: CreateIncidentF
   const [status, setStatus] = useState("investigating")
   const [services, setServices] = useState<Service[]>([])
   const [affectedServices, setAffectedServices] = useState<{ [key: string]: { affected: boolean; status: string } }>({})
+  const [message, setMessage] = useState("")
+
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -52,6 +54,7 @@ export function CreateIncidentForm({ orgId, onIncidentCreated }: CreateIncidentF
         description,
         status,
         affectedServices: affectedServiceData,
+        message,
       })
       onIncidentCreated(newIncident)
       // Reset form
@@ -64,6 +67,7 @@ export function CreateIncidentForm({ orgId, onIncidentCreated }: CreateIncidentF
           return acc
         }, {}),
       )
+      setMessage("")
     } catch (error) {
       console.error("Error creating incident:", error)
     }
@@ -129,6 +133,10 @@ export function CreateIncidentForm({ orgId, onIncidentCreated }: CreateIncidentF
             </Select>
           </div>
         ))}
+      </div>
+      <div>
+        <Label htmlFor="message">Initial Message</Label>
+        <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} required />
       </div>
       <Button type="submit">Create Incident</Button>
     </form>
