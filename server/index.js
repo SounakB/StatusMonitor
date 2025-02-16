@@ -210,7 +210,7 @@ app.get("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
     const { orgId } = req.params
     const incidents = await prisma.incident.findMany({
       where: { organizationId: orgId },
-      include: { services: true },
+      include: { services: true, messages: true },
     })
     res.json(incidents)
   } catch (error) {
