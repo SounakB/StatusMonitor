@@ -51,7 +51,7 @@ export default function IncidentsPage() {
           }}
         />
       )}
-      <IncidentList incidents={incidents} orgId={orgId} />
+      <IncidentList incidents={incidents} orgId={orgId} onIncidentSelect={() => null}/>
     </div>
   )
 }

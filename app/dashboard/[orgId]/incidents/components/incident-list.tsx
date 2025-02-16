@@ -33,9 +33,10 @@ type IncidentListProps = {
   incidents: Incident[]
   orgId: string
   allServices: { id: string; name: string }[]
+  onIncidentSelect: (incident: Incident) => void
 }
 
-export function IncidentList({ incidents, orgId }: IncidentListProps) {
+export function IncidentList({ incidents, orgId, onIncidentSelect }: IncidentListProps) {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null)
 
   const handleUpdate = (updatedIncident: Incident) => {
