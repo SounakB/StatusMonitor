@@ -30,7 +30,8 @@ export function EditIncidentForm({ incident, orgId, allServices, onUpdate, onCan
   const [description, setDescription] = useState(incident.description)
   const [status, setStatus] = useState(incident.status)
   const [services, setServices] = useState([])
-  const [affectedServices, setAffectedServices] = useState(incident.services.map((s) => ({id: s.id, status: services.find((service) => service.id === s.id)?.status})))
+  const [affectedServices, setAffectedServices] = useState(incident.services.map((s) => ({id: s.id, status: services.find((service) => service.id === s.id)?.status, affected: true})))
+  const [message, setMessage] = useState("")
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -134,6 +135,10 @@ export function EditIncidentForm({ incident, orgId, allServices, onUpdate, onCan
             </Select>
           </div>
         ))}
+      </div>
+      <div>
+        <Label htmlFor="message">Add a Message</Label>
+        <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} required />
       </div>
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
