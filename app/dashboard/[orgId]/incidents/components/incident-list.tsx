@@ -70,8 +70,8 @@ export function IncidentList({ incidents, orgId, onIncidentSelect }: IncidentLis
               </TableCell>
               <TableCell>
                 {incident.services.map((service) => (
-                  <div key={service.service.id} className="flex items-center space-x-2 mb-1">
-                    <span>{service.service.name}:</span>
+                  <div key={service.id} className="flex items-center space-x-2 mb-1">
+                    <span>{service.name}:</span>
                     <Badge variant={service.status === "operational" ? "success" : "destructive"}>
                       {service.status}
                     </Badge>
@@ -88,6 +88,7 @@ export function IncidentList({ incidents, orgId, onIncidentSelect }: IncidentLis
               </TableCell>
               <TableCell>
                 <Button onClick={() => onIncidentSelect(incident)}>View Timeline</Button>
+                <Button onClick={() => setEditingIncident(incident)}>Edit</Button>
               </TableCell>
             </TableRow>
           ))}
