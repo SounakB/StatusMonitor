@@ -164,7 +164,7 @@ app.put("/api/organizations/:orgId/services/:serviceId", checkJwt, async (req, r
 // Incident routes
 app.post("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
   try {
-    const { title, description, status, affectedServices } = req.body
+    const { title, description, status, affectedServices, message } = req.body
     const { orgId } = req.params
 
     const incident = await prisma.incident.create({
@@ -221,7 +221,7 @@ app.get("/api/organizations/:orgId/incidents", checkJwt, async (req, res) => {
 app.put("/api/organizations/:orgId/incidents/:incidentId", checkJwt, async (req, res) => {
   try {
     const { orgId, incidentId } = req.params
-    const { title, description, status, affectedServices } = req.body
+    const { title, description, status, affectedServices, message } = req.body
 
     const updatedIncident = await prisma.incident.update({
       where: { id: incidentId, organizationId: orgId },
