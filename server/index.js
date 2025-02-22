@@ -345,6 +345,7 @@ app.post("/api/organizations/:orgId/invite", checkJwt, async (req, res) => {
 
     // Send invitation email
     const inviteUrl = `${process.env.FRONTEND_URL}/invite/${invitation.id}`
+    /*
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: email,
@@ -355,7 +356,7 @@ app.post("/api/organizations/:orgId/invite", checkJwt, async (req, res) => {
         <a href="${inviteUrl}">${inviteUrl}</a>
       `,
     })
-
+    */
     res.json({ message: "Invitation sent successfully" })
   } catch (error) {
     console.error("Error sending invitation:", error)
