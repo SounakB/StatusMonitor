@@ -409,6 +409,99 @@ app.post("/api/invitations/:invitationId/accept", checkJwt, async (req, res) => 
   }
 })
 
+// Get team members
+app.get("/api/organizations/:orgId/members", checkJwt, async (req, res) => {
+  try {
+    const { orgId } = req.params
+    const auth0Id = req.auth.sub
+
+    // Verify the requesting user is a member of the organization
+    const user = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
+    const isMember = await prisma.organizationMember.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: user.id,
+          organizationId: orgId,
+        },
+      },
+    })
+
+    if (!isMember) {
+      return res.status(403).json({ error: "You are not a member of this organization" })
+    }
+
+    // Get all members of the organization
+    const members = await prisma.organizationMember.findMany({
+      where: { organizationId: orgId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    // Transform the data to match the expected TeamMember type
+    const teamMembers = members.map((member) => ({
+      id: member.user.id,
+      name: member.user.name || 'Unknown',
+      email: member.user.email,
+      role: member.role,
+    }))
+
+    res.json(teamMembers)
+  } catch (error) {
+    console.error("Error fetching team members:", error)
+    res.status(500).json({ error: "Error fetching team members" })
+  }
+})
+
+// Remove team member
+app.delete("/api/organizations/:orgId/members/:memberId", checkJwt, async (req, res) => {
+  try {
+    const { orgId, memberId } = req.params
+    const auth0Id = req.auth.sub
+
+    // Verify the requesting user is an admin
+    const requestingUser = await getOrCreateUser(auth0Id, req.auth.email, req.auth.name)
+    const adminMember = await prisma.organizationMember.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: requestingUser.id,
+          organizationId: orgId,
+        },
+      },
+    })
+
+    if (!adminMember || adminMember.role !== 'admin') {
+      return res.status(403).json({ error: "Only admins can remove team members" })
+    }
+
+    // Don't allow removing yourself
+    if (memberId === requestingUser.id) {
+      return res.status(400).json({ error: "You cannot remove yourself from the organization" })
+    }
+
+    // Remove the member
+    await prisma.organizationMember.delete({
+      where: {
+        userId_organizationId: {
+          userId: memberId,
+          organizationId: orgId,
+        },
+      },
+    })
+
+    res.json({ message: "Team member removed successfully" })
+  } catch (error) {
+    console.error("Error removing team member:", error)
+    res.status(500).json({ error: "Error removing team member" })
+  }
+})
+
 // WebSocket connection handler
 io.on("connection", (socket) => {
   console.log("A user connected")

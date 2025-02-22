@@ -6,6 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 import { toast } from "@/components/ui/use-toast"
 import { inviteTeamMember } from "@/lib/api-client"
 
@@ -90,6 +102,44 @@ export function TeamManagement({ orgId, initialTeamMembers }: TeamManagementProp
                   <TableCell>{member.name}</TableCell>
                   <TableCell>{member.email}</TableCell>
                   <TableCell>{member.role}</TableCell>
+                  <TableCell>
+                    {user.role === 'admin' && member.id !== user.id && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">Remove</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove team member</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to remove {member.name} from the organization? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={async () => {
+                              try {
+                                await removeTeamMember(orgId, member.id)
+                                setTeamMembers(teamMembers.filter(m => m.id !== member.id))
+                                toast({
+                                  title: "Team member removed",
+                                  description: `${member.name} has been removed from the organization.`,
+                                })
+                              } catch (error) {
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to remove team member.",
+                                  variant: "destructive",
+                                })
+                              }
+                            }}>
+                              Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

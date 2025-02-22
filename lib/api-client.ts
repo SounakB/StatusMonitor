@@ -147,3 +147,9 @@ export async function acceptInvitation(invitationId: string) {
   })
 }
 
+export async function removeTeamMember(orgId: string, memberId: string) {
+  return fetchAPI(`/api/organizations/${orgId}/members/${memberId}`, {
+    method: "DELETE",
+  })
+}
+
