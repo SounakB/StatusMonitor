@@ -153,3 +153,7 @@ export async function removeTeamMember(orgId: string, memberId: string) {
   })
 }
 
+export async function getPendingInvitations() {
+  return fetchAPI(`/api/invitations/pending`)
+}
+
