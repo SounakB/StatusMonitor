@@ -83,29 +83,22 @@ export function EditIncidentForm({ incident, orgId, allServices, onUpdate, onCan
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Affected Services</label>
-        {/* {services.map((service) => (
-          <div key={service.id} className="flex items-center">
-            <input
-              type="checkbox"
-              id={`service-${service.id}`}
-              checked={affectedServices.includes(service.id)}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setAffectedServices([...affectedServices, service.id])
-                } else {
-                  setAffectedServices(affectedServices.filter((id) => id !== service.id))
-                }
-              }}
-              className="mr-2"
-            />
-            <label htmlFor={`service-${service.id}`}>{service.name}</label>
-          </div>
-        ))} */}
-        {services.map((service) => (
+
+        {services.map((service) => {
+          let checked = false;
+          let status;
+
+          affectedServices.forEach(affectedService => {
+            if (affectedService.id === service.id) {
+              checked = true;
+              status = affectedService.status;
+            }
+          })
+          return (
           <div key={service.id} className="flex items-center space-x-2 mt-2">
             <Checkbox
               id={`service-${service.id}`}
-              checked={affectedServices[service.id]?.affected}
+              checked={checked}
               onCheckedChange={(checked) => {
                 setAffectedServices((prev) => ({
                   ...prev,
@@ -115,14 +108,14 @@ export function EditIncidentForm({ incident, orgId, allServices, onUpdate, onCan
             />
             <Label htmlFor={`service-${service.id}`}>{service.name}</Label>
             <Select
-              value={affectedServices[service.id]?.status}
+              value={service.status}
               onValueChange={(value) => {
                 setAffectedServices((prev) => ({
                   ...prev,
                   [service.id]: { ...prev[service.id], status: value },
                 }))
               }}
-              disabled={!affectedServices[service.id]?.affected}
+              disabled={!checked}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a status" />
@@ -134,7 +127,7 @@ export function EditIncidentForm({ incident, orgId, allServices, onUpdate, onCan
               </SelectContent>
             </Select>
           </div>
-        ))}
+        )})}
       </div>
       <div>
         <Label htmlFor="message">Add a Message</Label>
