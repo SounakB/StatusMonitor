@@ -100,3 +100,12 @@ model Invitation {
 
   @@unique([email, organizationId])
 }
+
+model UptimeEntry {
+  id        String   @id @default(cuid())
+  service   Service  @relation(fields: [serviceId], references: [id])
+  serviceId String
+  timestamp DateTime @default(now())
+  isUp      Boolean
+}
+

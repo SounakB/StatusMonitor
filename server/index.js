@@ -563,6 +563,67 @@ app.get("/api/invitations/:invitationId", async (req, res) => {
   }
 })
 
+app.get("/api/organizations/:orgId/services/:serviceId/uptime", async (req, res) => {
+  try {
+    const { orgId, serviceId } = req.params
+    const { days = 30 } = req.query
+
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - Number.parseInt(days))
+
+    const uptimeEntries = await prisma.uptimeEntry.findMany({
+      where: {
+        serviceId,
+        timestamp: {
+          gte: startDate,
+        },
+      },
+      orderBy: {
+        timestamp: "asc",
+      },
+    })
+
+    const uptimeData = calculateUptimePercentage(uptimeEntries, Number.parseInt(days))
+
+    res.json(uptimeData)
+  } catch (error) {
+    console.error("Error fetching uptime data:", error)
+    res.status(500).json({ error: "Failed to fetch uptime data" })
+  }
+})
+
+function calculateUptimePercentage(entries, days) {
+  const dailyUptime = new Array(days).fill(0).map((_, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - index)
+    date.setHours(0, 0, 0, 0)
+    return { date, upCount: 0, totalCount: 0 }
+  })
+
+  entries.forEach((entry) => {
+    const entryDate = new Date(entry.timestamp)
+    entryDate.setHours(0, 0, 0, 0)
+    const index = Math.floor((Date.now() - entryDate.getTime()) / (1000 * 60 * 60 * 24))
+    if (index < days) {
+      dailyUptime[index].totalCount++
+      if (entry.isUp) {
+        dailyUptime[index].upCount++
+      }
+    }
+  })
+
+  return dailyUptime
+    .map((day) => ({
+      date: day.date.toISOString().split("T")[0],
+      uptime: day.totalCount > 0 ? (day.upCount / day.totalCount) * 100 : null,
+    }))
+    .reverse()
+}
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+
 
 // WebSocket connection handler
 io.on("connection", (socket) => {

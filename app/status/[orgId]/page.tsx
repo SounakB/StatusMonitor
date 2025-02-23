@@ -6,6 +6,7 @@ import { getPublicStatus, initializeSocket, joinOrganization, leaveOrganization 
 import { ServiceStatus } from "./components/service-status"
 import { IncidentList } from "./components/incident-list"
 import { IncidentTimeline } from "../../dashboard/[orgId]/incidents/components/incident-timeline"
+import { UptimeGraph } from "./components/uptime-graph"
 
 export default function StatusPage() {
   const [organization, setOrganization] = useState(null)
@@ -63,6 +64,9 @@ export default function StatusPage() {
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{organization.name} Status</h1>
       <ServiceStatus services={organization.services} />
+      {organization.services.map((service) => (
+        <UptimeGraph key={service.id} orgId={orgId} serviceId={service.id} serviceName={service.name} />
+      ))}
       <h2 className="text-2xl font-bold mt-8 mb-4">Current Incidents</h2>
       <IncidentList incidents={organization.incidents} onIncidentSelect={(incident) => setSelectedIncident(incident)} />
       {selectedIncident && (

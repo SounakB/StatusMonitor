@@ -157,3 +157,7 @@ export async function getPendingInvitations() {
   return fetchAPI(`/api/invitations/pending`)
 }
 
+
+export async function getServiceUptime(orgId: string, serviceId: string, days = 30) {
+  return fetchAPI(`/api/organizations/${orgId}/services/${serviceId}/uptime?days=${days}`)
+}
