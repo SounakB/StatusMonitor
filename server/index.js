@@ -503,39 +503,6 @@ app.delete("/api/organizations/:orgId/members/:memberId", checkJwt, async (req, 
   }
 })
 
-// Get invitation details
-app.get("/api/invitations/:invitationId", async (req, res) => {
-  try {
-    const { invitationId } = req.params
-    const auth0Id = req.auth.sub
-
-    const invitation = await prisma.invitation.findUnique({
-      where: { id: invitationId },
-      include: {
-        organization: {
-          select: {
-            name: true
-          }
-        }
-      }
-    })
-
-    if (!invitation) {
-      return res.status(404).json({ error: "Invitation not found" })
-    }
-
-    res.json({
-      id: invitation.id,
-      organization: {
-        name: invitation.organization.name
-      }
-    })
-  } catch (error) {
-    console.error("Error fetching invitation:", error)
-    res.status(500).json({ error: "Error fetching invitation" })
-  }
-})
-
 // Get pending invitations for the current user
 app.get("/api/invitations/pending", checkJwt, async (req, res) => {
   try {
@@ -564,6 +531,39 @@ app.get("/api/invitations/pending", checkJwt, async (req, res) => {
   }
 })
 
+// Get invitation details
+app.get("/api/invitations/:invitationId", async (req, res) => {
+  try {
+    const { invitationId } = req.params
+
+    const invitation = await prisma.invitation.findUnique({
+      where: { id: invitationId },
+      include: {
+        organization: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+
+    if (!invitation) {
+      return res.status(404).json({ error: "Invitation not found" })
+    }
+
+    res.json({
+      id: invitation.id,
+      organization: {
+        name: invitation.organization.name
+      }
+    })
+  } catch (error) {
+    console.error("Error fetching invitation:", error)
+    res.status(500).json({ error: "Error fetching invitation" })
+  }
+})
+
+
 // WebSocket connection handler
 io.on("connection", (socket) => {
   console.log("A user connected")
@@ -587,3 +587,4 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
+//check if the parameter pending = tue is present in the request and only then filter by the status: "pending"
