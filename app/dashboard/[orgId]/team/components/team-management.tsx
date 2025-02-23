@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import { toast } from "@/components/ui/use-toast"
-import { inviteTeamMember } from "@/lib/api-client"
+import { inviteTeamMember, removeTeamMember } from "@/lib/api-client"
 
 type TeamMember = {
   id: string
