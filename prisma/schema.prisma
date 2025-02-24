@@ -44,38 +44,39 @@ model OrganizationMember {
 }
 
 model Service {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   name           String
   description    String?
   status         String // e.g., 'operational', 'degraded', 'outage'
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization  @relation(fields: [organizationId], references: [id])
   organizationId String
   incidents      Incident[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  uptimeEntries  UptimeEntry[]
 }
 
 model Incident {
-  id             String           @id @default(cuid())
+  id             String            @id @default(cuid())
   title          String
   description    String
   status         String // e.g., 'investigating', 'identified', 'monitoring', 'resolved'
-  organization   Organization     @relation(fields: [organizationId], references: [id])
+  organization   Organization      @relation(fields: [organizationId], references: [id])
   organizationId String
   services       Service[]
   updates        IncidentUpdate[]
   messages       IncidentMessage[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 }
 
 model IncidentMessage {
-  id          String    @id @default(cuid())
-  content     String
-  status      String
-  incident    Incident  @relation(fields: [incidentId], references: [id])
-  incidentId  String
-  createdAt   DateTime  @default(now())
+  id         String   @id @default(cuid())
+  content    String
+  status     String
+  incident   Incident @relation(fields: [incidentId], references: [id])
+  incidentId String
+  createdAt  DateTime @default(now())
 }
 
 model IncidentUpdate {
@@ -108,4 +109,3 @@ model UptimeEntry {
   timestamp DateTime @default(now())
   isUp      Boolean
 }
-
